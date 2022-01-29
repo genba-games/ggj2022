@@ -20,16 +20,18 @@ export default class Rata extends Phaser.GameObjects.Sprite {
     protected modifiers: {
         gunRotation: number
     }
+    protected hurtFlicker: Phaser.Tweens.Tween;
+    protected hurtInvulnerability: Phaser.Tweens.Tween;
+
     constructor(scene, x, y, texture, type, bulletGroup) {
         super(scene, x, y, texture);
         this.scene = scene;
         this.scene.add.existing(this);
         this.scene.physics.world.enableBody(this, 0);
-        this.setData('type', type);
-
         if (this.body instanceof Phaser.Physics.Arcade.Body) {
             this.body.setCollideWorldBounds();
         }
+        this.setData('type', type);
 
         this.cursorKeys = {
             up: scene.input.keyboard.addKey('UP'),
@@ -41,21 +43,55 @@ export default class Rata extends Phaser.GameObjects.Sprite {
             die: scene.input.keyboard.addKey('CTRL')
         }
 
+        this.hurtFlicker = this.scene.tweens
+            .add({
+                targets: this,
+                alpha: { from: 1, to: 0 },
+                yoyo: true,
+                ease: 'Linear',
+                duration: 100,
+                repeat: 10,
+                onComplete: () => {
+                    // This re-enables the player to be hurt again
+                    this.hurt = false;
+                },
+                onCompleteScope: this
+            })
+            .stop();
+        this.hurtInvulnerability = this.scene.tweens
+            .add({
+                targets: this,
+                alpha: { from: 1, to: 0 },
+                yoyo: true,
+                ease: 'Linear',
+                duration: 100,
+                repeat: 75, //75 * 100ms * 2yoyo is around 15 seconds
+                onComplete: () => {
+                    // This re-enables the player to be hurt again SOMETIMES
+                    this.hurt = false;
+                },
+                onCompleteScope: this
+            })
+            .stop();
+
+
         // this.scale = 0.25;
         this.score = 0;
         this.startTime = Date.now();
         this.hp = 100;
         this.hurt = false;
 
-        this.speed = 500;
+        this.speed = 300;
         this.setData('score', 0);
         this.setData('shotDelay', 200);
+        this.setData('hp', 100);
         this.setData('shotTimer', this.getData('shotDelay'));
         this.setData('effect', 'default');
         this.setData('bulletSound', 'pew');
 
         this.bulletGroup = bulletGroup;
         this.gun = this.scene.add.sprite(this.x, this.y, 'revolver', 0).setOrigin(2, 0).setScale(1.5);
+
         this.modifiers = { gunRotation: 1 }
     }
 
@@ -80,6 +116,22 @@ export default class Rata extends Phaser.GameObjects.Sprite {
         // OPTIMIZE THIS
         if (this.scene) this.scene.tweens.killTweensOf(this);
     }
+
+    hit() {
+        console.log("ouch")
+        if (this.hurt || this.hurtFlicker.isPlaying()) return;
+        // this would look neater on the tween onStart
+        // but something happened and couldn't make it work
+        this.hurt = true;
+        this.hurtFlicker.play();
+        this.hp -= 10;
+        if (this.hp <= 0) {
+            this.kill();
+        }
+        this.setData('hp', this.hp);
+    }
+
+
     moveUp() {
         if (this.body.velocity instanceof Phaser.Math.Vector2) {
             this.body.velocity.setTo(0, -this.speed);
@@ -151,6 +203,7 @@ export default class Rata extends Phaser.GameObjects.Sprite {
 
     // This will call the death transition and send the highscore data
     kill() {
+        this.gun.visible = false;
         this.hurt = false;
         // Here we should play the explosion or equivalent
         this.visible = false;
@@ -163,7 +216,7 @@ export default class Rata extends Phaser.GameObjects.Sprite {
     }
 
     fire() {
-        if (this.getData('shotTimer') >= this.getData('shotDelay')) {
+        if (this.getData('shotTimer') >= this.getData('shotDelay') && this.visible === true) {
             // Here we should check the effect and change the firing
             // const blasterY = this.y - 55;
 

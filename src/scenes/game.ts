@@ -5,8 +5,8 @@ import Enemigo from '../actors/enemigo'
 import { StoneBaseFactory, CrystalBaseFactory } from '../services/objectFactory'
 
 export default class GameScene extends Phaser.Scene {
-    protected playerGroup: Phaser.GameObjects.Group;
-    protected enemyGroup: Phaser.GameObjects.Group;
+    private playerGroup: Phaser.GameObjects.Group;
+    private enemyGroup: Phaser.GameObjects.Group;
     private objectGroup: Phaser.GameObjects.Group;
     private StoneBaseFactory: StoneBaseFactory;
     private CrystalBaseFactory: CrystalBaseFactory;
@@ -16,8 +16,8 @@ export default class GameScene extends Phaser.Scene {
     private enemigo2: Enemigo;
     private enemigo3: Enemigo;
     private enemigo4: Enemigo;
-    protected playerBullets: Phaser.GameObjects.Group;
-
+    private playerBullets: Phaser.GameObjects.Group;
+    private score: number
     constructor() {
         super('demo');
     }
@@ -43,15 +43,17 @@ export default class GameScene extends Phaser.Scene {
         this.objectGroup = this.add.group({ maxSize: 20, runChildUpdate: true });
         this.playerGroup = this.add.group({ runChildUpdate: true });
         this.enemyGroup = this.add.group({ runChildUpdate: true });
-        this.playerBullets = this.add.group({ maxSize: 25, runChildUpdate: true });
+        this.playerBullets = this.add.group({ maxSize: 6, runChildUpdate: true });
 
     }
 
     create() {
+        this.score = 0;
         this.playerBullets.createMultiple({
             classType: Blaster,
             key: 'blaster',
-            repeat: 25
+            repeat: 25,
+            active: true,
         });
         Phaser.Actions.SetXY(this.playerBullets.getChildren(), -100, -50);
         // this.setBounds(0, 0, 1280, 720);
@@ -74,19 +76,48 @@ export default class GameScene extends Phaser.Scene {
         this.cameras.main.startFollow(this.rata)
         this.cameras.main.zoom = 1.5
 
-        // this.add.shader('Plasma', 0, 412, 800, 172).setOrigin(0);
+        this.physics.add.overlap(
+            this.playerGroup,
+            this.enemyGroup,
+            this.playerEnemyCallback,
+            undefined,
+            this
+        );
 
-        //     this.add.image(320, 400, 'libs').setScale(0.5);
-        //     const logo = this.add.image(320, 70, 'logo');
+        this.physics.add.overlap(
+            this.playerGroup,
+            this.playerBullets,
+            this.playerBulletCallback,
+            undefined,
+            this
+        );
+        this.physics.add.overlap(
+            this.playerBullets,
+            this.enemyGroup,
+            this.bulletEnemyCallback,
+            undefined,
+            this
+        );
 
-        //     this.tweens.add({
-        //         targets: logo,
-        //         y: 350,
-        //         duration: 1500,
-        //         ease: 'Sine.inOut',
-        //         yoyo: true,
-        //         repeat: -1
-        //     })
+        this.events.on('enemyKill', this.updateScore, this);
+
+    }
+    updateScore(score) {
+        this.score += score
+        console.log(`New score ${this.score}`)
+    }
+    playerEnemyCallback(player: any, enemy: Phaser.GameObjects.GameObject) {
+        if (!enemy.active) return;
+        player.hit();
+    }
+    playerBulletCallback(player: any, bullet: Phaser.GameObjects.GameObject) {
+        if (!bullet.active) return;
+        bullet.destroy();
+    }
+    bulletEnemyCallback(bullet: any, enemy: any) {
+        if (!bullet.armed) return;
+        enemy.hit();
+        bullet.hit();
     }
     update() {
 

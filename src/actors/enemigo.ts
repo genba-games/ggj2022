@@ -27,7 +27,7 @@ export default class Rata extends Phaser.GameObjects.Sprite {
 
         this.speed = 100;
         this.target = target
-
+        this.score = 100;
         // this.scene.tweens.add({
         //     targets: this,
         //     duration: 1000,
@@ -66,7 +66,11 @@ export default class Rata extends Phaser.GameObjects.Sprite {
         // OPTIMIZE THIS
         if (this.scene) this.scene.tweens.killTweensOf(this);
     }
-
+    hit() {
+        console.log("this should update the score and kill the enemy")
+        this.scene.events.emit('enemyKill', this.score);
+        this.destroy();
+    }
     update(time, delta) {
         this.scene.physics.moveToObject(this, this.target, this.speed)
 
