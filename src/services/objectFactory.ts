@@ -24,13 +24,8 @@ export class StoneBaseFactory extends BaseFactory {
     }
 
     public create(params: IBaseFactoryCreate) {
-        this.logCreation('Stone');
-        return new Stone({
-            scene: params.scene,
-            x: params.x,
-            y: params.y,
-            key: 'enemy'
-        });
+        this.logCreation('rock');
+        return new Stone(params.scene, params.x, params.y);
     }
 }
 
@@ -40,12 +35,7 @@ export class CrystalBaseFactory extends BaseFactory {
     }
 
     public create(params: IBaseFactoryCreate) {
-        this.logCreation('Crystal');
-        return new Crystal({
-            scene: params.scene,
-            x: params.x,
-            y: params.y,
-            key: 'enemy'
-        });
+        this.logCreation('crystal');
+        return new Crystal(params.scene, params.x, params.y);
     }
 }

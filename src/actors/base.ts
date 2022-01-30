@@ -2,8 +2,8 @@ export class Base extends Phaser.GameObjects.Sprite {
     protected extendedProperty: number;
     protected asset: string;
 
-    constructor(params) {
-        super(params.scene, params.x, params.y, params.key);
+    constructor(scene, x, y, texture) {
+        super(scene, x, y, texture);
         this.scene.add.existing(this);
         if (this.body instanceof Phaser.Physics.Arcade.Body) {
             this.body.setCollideWorldBounds();

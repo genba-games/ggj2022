@@ -118,10 +118,10 @@ export default class Rata extends Phaser.GameObjects.Sprite {
     }
 
     hit() {
-        console.log("ouch")
         if (this.hurt || this.hurtFlicker.isPlaying()) return;
         // this would look neater on the tween onStart
         // but something happened and couldn't make it work
+        console.log("ouch")
         this.hurt = true;
         this.hurtFlicker.play();
         this.hp -= 10;

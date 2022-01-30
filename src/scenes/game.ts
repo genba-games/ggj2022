@@ -3,6 +3,7 @@ import Rata from '../actors/rata'
 import Blaster from '../actors/blaster'
 import Enemigo from '../actors/enemigo'
 import { StoneBaseFactory, CrystalBaseFactory } from '../services/objectFactory'
+import { gameHeight, gameWidth } from '../utils'
 
 export default class GameScene extends Phaser.Scene {
     private playerGroup: Phaser.GameObjects.Group;
@@ -32,7 +33,7 @@ export default class GameScene extends Phaser.Scene {
         this.load.image('rataMala', 'assets/rata_mala.png');
         this.load.image('revolver', 'assets/revolver.png');
         this.load.image('bullit', 'assets/bullit.png');
-        this.load.spritesheet('crystal', 'assets/crystal.png', { frameWidth: 32, frameHeight: 32 });
+        this.load.spritesheet('crystal', 'assets/crystal.png', { frameWidth: 32, frameHeight: 48 });
         this.load.spritesheet('rock', 'assets/rock.png', { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet('small_crystal', 'assets/small_crystal.png', { frameWidth: 16, frameHeight: 16 });
 
@@ -76,7 +77,15 @@ export default class GameScene extends Phaser.Scene {
         this.enemyGroup.add(this.enemigo3)
         this.enemyGroup.add(this.enemigo4)
 
-        this.objectGroup.createMultiple({ key: 'rock', frame: 0, active: true, visible: true, setXY: { x: 20, y: 20, stepX: 10, stepY: 10 }, max: 500 });
+        for (var i = 0; i < 20; i++) {
+            let y = Phaser.Math.RND.between(0, gameHeight);
+            let yc = Phaser.Math.RND.between(0, gameHeight);
+            let x = Phaser.Math.RND.between(0, gameWidth);
+            let xc = Phaser.Math.RND.between(0, gameWidth);
+
+            this.StoneBaseFactory.create({ scene: this, x, y });
+            this.CrystalBaseFactory.create({ scene: this, x: xc, y: yc });
+        }
         this.cameras.main.startFollow(this.rata)
         this.cameras.main.zoom = 1.5
 
