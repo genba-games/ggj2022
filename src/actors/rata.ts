@@ -226,6 +226,10 @@ export default class Rata extends Phaser.GameObjects.Sprite {
             let ab = this.bulletGroup.get()
             if (ab) {
                 ab.fire(this.gun)
+            } else {
+                console.log("no bullet in chamber, play click noise")
+                // soundManager.play(this.getData('click'), true);
+                this.scene.sound.play("click");
             }
             // soundManager.play(this.getData('bulletSound'), true);
             this.setData('shotTimer', 0);

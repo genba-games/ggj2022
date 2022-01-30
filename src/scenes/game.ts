@@ -19,7 +19,7 @@ export default class GameScene extends Phaser.Scene {
     private playerBullets: Phaser.GameObjects.Group;
     private score: number
     constructor() {
-        super('demo');
+        super('GameScene');
     }
     preload() {
         this.load.image('logo', 'assets/phaser3-logo.png');
@@ -35,6 +35,10 @@ export default class GameScene extends Phaser.Scene {
         this.load.spritesheet('crystal', 'assets/crystal.png', { frameWidth: 32, frameHeight: 32 });
         this.load.spritesheet('rock', 'assets/rock.png', { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet('small_crystal', 'assets/small_crystal.png', { frameWidth: 16, frameHeight: 16 });
+
+
+        this.load.audio("click", 'assets/click.ogg')
+        this.load.audio("game_music", 'assets/hadamago.ogg')
     }
 
     init() {
@@ -100,6 +104,8 @@ export default class GameScene extends Phaser.Scene {
         );
 
         this.events.on('enemyKill', this.updateScore, this);
+
+        let gm = this.sound.play("game_music", { volume: 0.2 });
 
     }
     updateScore(score) {

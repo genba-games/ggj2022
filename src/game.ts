@@ -1,5 +1,6 @@
 import 'phaser';
 import GameScene from './scenes/game';
+import IntroScene from './scenes/intro';
 import { gameWidth, gameHeight } from './utils'
 
 
@@ -14,7 +15,7 @@ const config = {
             debug: false,
         }
     },
-    scene: GameScene,
+    scene: [IntroScene, GameScene],
 };
 
 const game = new Phaser.Game(config);
