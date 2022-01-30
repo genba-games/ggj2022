@@ -15,7 +15,7 @@ export default class GameScene extends Phaser.Scene {
     }
     preload() {
         this.load.image('rata_disfrazada', 'assets/rata_disfrazada.png');
-        this.load.image('revolver', 'assets/revolver.png');
+        this.load.image('quesito', 'assets/blue_cheese.png');
         this.load.image("gato_i", 'assets/gato_i.png')
         this.load.image("gato_d", 'assets/gato_d.png')
 
@@ -39,7 +39,7 @@ export default class GameScene extends Phaser.Scene {
         this.cameras.main.startFollow(this.rata)
         this.cameras.main.zoom = 1.5
 
-        this.gun = this.add.sprite(1000, 400, 'revolver', 0).setScale(1.5);
+        this.gun = this.add.sprite(1000, 400, 'quesito', 0)
         this.physics.world.enableBody(this.gun, 0);
 
         this.physics.add.overlap(
@@ -49,7 +49,12 @@ export default class GameScene extends Phaser.Scene {
             undefined,
             this
         );
-
+        this.add.sprite(1253, 713, 'rata_disfrazada', 0)
+        this.add.sprite(1356, 419, 'rata_disfrazada', 0)
+        this.add.sprite(1249, 279, 'rata_disfrazada', 0)
+        this.add.sprite(743, 566, 'rata_disfrazada', 0).flipX = true
+        this.add.sprite(640, 493, 'rata_disfrazada', 0).flipX = true
+        this.add.sprite(739, 292, 'rata_disfrazada', 0).flipX = true
         //probably should do this in a for
         this.catGroup.createMultiple({ key: 'gato_i', frame: 0, active: true, visible: true, repeat: 14, setXY: { x: 1900, y: 50, stepY: 70 }, max: 500 });
         this.catGroup.createMultiple({ key: 'gato_i', frame: 0, active: true, visible: true, repeat: 14, setXY: { x: 1800, y: 50, stepY: 70 }, max: 500 });

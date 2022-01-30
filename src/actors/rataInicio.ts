@@ -21,7 +21,7 @@ export default class RataInicio extends Phaser.GameObjects.Sprite {
         if (this.body instanceof Phaser.Physics.Arcade.Body) {
             this.body.setCollideWorldBounds();
         }
-        this.speed = 500;
+        this.speed = 200;
         this.cursorKeys = {
             up: scene.input.keyboard.addKey('UP'),
             down: scene.input.keyboard.addKey('DOWN'),
@@ -45,15 +45,8 @@ export default class RataInicio extends Phaser.GameObjects.Sprite {
             this.body.velocity.setTo(0, this.speed);
         }
     }
-
-    moveLeft() {
-        if (this.body.velocity instanceof Phaser.Math.Vector2) {
-
-            this.body.velocity.setTo(-this.speed, 0);
-        }
-    }
-
     moveRight() {
+        this.flipX = true
         if (this.body.velocity instanceof Phaser.Math.Vector2) {
 
             this.body.velocity.setTo(this.speed, 0);
@@ -61,6 +54,7 @@ export default class RataInicio extends Phaser.GameObjects.Sprite {
     }
 
     moveRightUp() {
+        this.flipX = true
         if (this.body.velocity instanceof Phaser.Math.Vector2) {
             this.body.velocity.setToPolar(Phaser.Math.DegToRad(-45), this.speed);
         }
@@ -68,13 +62,23 @@ export default class RataInicio extends Phaser.GameObjects.Sprite {
     }
 
     moveRightDown() {
+        this.flipX = true
         if (this.body.velocity instanceof Phaser.Math.Vector2) {
             this.body.velocity.setToPolar(Phaser.Math.DegToRad(45), this.speed);
         }
 
-    }
 
+    }
+    moveLeft() {
+        this.flipX = false
+        if (this.body.velocity instanceof Phaser.Math.Vector2) {
+
+            this.body.velocity.setTo(-this.speed, 0);
+        }
+    }
     moveLeftUp() {
+
+        this.flipX = false
         if (this.body.velocity instanceof Phaser.Math.Vector2) {
             this.body.velocity.setToPolar(Phaser.Math.DegToRad(-135), this.speed);
         }
@@ -82,6 +86,8 @@ export default class RataInicio extends Phaser.GameObjects.Sprite {
     }
 
     moveLeftDown() {
+
+        this.flipX = false
         if (this.body.velocity instanceof Phaser.Math.Vector2) {
             this.body.velocity.setToPolar(Phaser.Math.DegToRad(135), this.speed);
         }

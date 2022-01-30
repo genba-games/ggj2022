@@ -158,12 +158,10 @@ export default class Rata extends Phaser.GameObjects.Sprite {
         this.lastHurt = this.scene.time.now
     }
 
-
     moveUp() {
         if (this.body.velocity instanceof Phaser.Math.Vector2) {
             this.body.velocity.setTo(0, -this.speed);
         }
-
     }
 
     moveDown() {
@@ -171,15 +169,8 @@ export default class Rata extends Phaser.GameObjects.Sprite {
             this.body.velocity.setTo(0, this.speed);
         }
     }
-
-    moveLeft() {
-        if (this.body.velocity instanceof Phaser.Math.Vector2) {
-
-            this.body.velocity.setTo(-this.speed, 0);
-        }
-    }
-
     moveRight() {
+        this.flipX = true
         if (this.body.velocity instanceof Phaser.Math.Vector2) {
 
             this.body.velocity.setTo(this.speed, 0);
@@ -187,6 +178,7 @@ export default class Rata extends Phaser.GameObjects.Sprite {
     }
 
     moveRightUp() {
+        this.flipX = true
         if (this.body.velocity instanceof Phaser.Math.Vector2) {
             this.body.velocity.setToPolar(Phaser.Math.DegToRad(-45), this.speed);
         }
@@ -194,13 +186,22 @@ export default class Rata extends Phaser.GameObjects.Sprite {
     }
 
     moveRightDown() {
+        this.flipX = true
         if (this.body.velocity instanceof Phaser.Math.Vector2) {
             this.body.velocity.setToPolar(Phaser.Math.DegToRad(45), this.speed);
         }
 
-    }
 
+    }
+    moveLeft() {
+        this.flipX = false
+        if (this.body.velocity instanceof Phaser.Math.Vector2) {
+
+            this.body.velocity.setTo(-this.speed, 0);
+        }
+    }
     moveLeftUp() {
+        this.flipX = false
         if (this.body.velocity instanceof Phaser.Math.Vector2) {
             this.body.velocity.setToPolar(Phaser.Math.DegToRad(-135), this.speed);
         }
@@ -208,11 +209,11 @@ export default class Rata extends Phaser.GameObjects.Sprite {
     }
 
     moveLeftDown() {
+        this.flipX = false
         if (this.body.velocity instanceof Phaser.Math.Vector2) {
             this.body.velocity.setToPolar(Phaser.Math.DegToRad(135), this.speed);
         }
     }
-
 
     stopX() {
         this.body.velocity.x = 0;
@@ -249,10 +250,10 @@ export default class Rata extends Phaser.GameObjects.Sprite {
             // const blasterY = this.y - 55;
 
             // const spacing = 25;
-
             //we should get the gun orientation here
             let ab = this.bulletGroup.get()
             if (ab) {
+                this.scene.sound.play('shoot')
                 ab.fire(this.gun)
             } else {
                 this.scene.sound.play("click");

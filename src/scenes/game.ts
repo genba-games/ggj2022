@@ -11,10 +11,6 @@ export default class GameScene extends Phaser.Scene {
     private StoneBaseFactory: StoneBaseFactory;
     private CrystalBaseFactory: CrystalBaseFactory;
     private rata: Rata;
-    private enemigo: Enemigo;
-    private enemigo2: Enemigo;
-    private enemigo3: Enemigo;
-    private enemigo4: Enemigo;
     private playerBullets: Phaser.GameObjects.Group;
     private score: number
     private gameMusic: Phaser.Sound.BaseSound;
@@ -36,14 +32,18 @@ export default class GameScene extends Phaser.Scene {
         this.load.image('rata_disfrazada', 'assets/rata_disfrazada.png');
         this.load.image('revolver', 'assets/revolver.png');
         this.load.image('bullit', 'assets/bullit.png');
-        this.load.image("gato_i", 'assets/gato_i.png')
-        this.load.image("gato_d", 'assets/gato_d.png')
+        //gatos
+        this.load.image("manchado", 'assets/manchado.png')
+        this.load.image("tom", 'assets/tom.png')
+        this.load.image("caramelo", 'assets/caramelo.png')
+
         this.load.spritesheet('crystal', 'assets/crystal.png', { frameWidth: 32, frameHeight: 48 });
         this.load.spritesheet('rock', 'assets/rock.png', { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet('small_crystal', 'assets/small_crystal.png', { frameWidth: 16, frameHeight: 16 });
 
 
         this.load.audio("click", 'assets/click.ogg')
+        this.load.audio("shoot", 'assets/shoot.ogg')
         this.load.audio("game_music", 'assets/hadamago.ogg')
     }
 
@@ -60,16 +60,6 @@ export default class GameScene extends Phaser.Scene {
     }
 
     create() {
-
-
-        // this.enemyGroup.createMultiple({
-        //     classType: Enemigo,
-        //     key: 'gato_i',
-        //     repeat: 6,
-        //     active: false,
-
-        // });
-
         this.playerBullets.createMultiple({
             classType: Blaster,
             key: 'blaster',
@@ -77,19 +67,6 @@ export default class GameScene extends Phaser.Scene {
             active: true,
         });
         Phaser.Actions.SetXY(this.playerBullets.getChildren(), -100, -50);
-        // this.setBounds(0, 0, 1280, 720);
-        this.add.shader('RGB Shift Field', -700, -700, 4000, 2000).setOrigin(0);
-        this.add.image(0, 0, 'map').setOrigin(0).setScale(1);
-
-        this.rata = new Rata(this, 500, 500, 'rata', 'player', this.playerBullets);
-        this.playerGroup.add(this.rata)
-
-        this.enemyGroup.add(new Enemigo(this, 'gato_i', 'enemy', this.rata));
-        this.enemyGroup.add(new Enemigo(this, 'gato_i', 'enemy', this.rata));
-        this.enemyGroup.add(new Enemigo(this, 'gato_i', 'enemy', this.rata));
-        this.enemyGroup.add(new Enemigo(this, 'gato_i', 'enemy', this.rata));
-        this.enemyGroup.add(new Enemigo(this, 'gato_i', 'enemy', this.rata));
-        this.enemyGroup.add(new Enemigo(this, 'rataMala', 'enemy', this.rata));
 
         for (var i = 0; i < 20; i++) {
             let y = Phaser.Math.RND.between(0, gameHeight);
@@ -100,6 +77,22 @@ export default class GameScene extends Phaser.Scene {
             this.StoneBaseFactory.create({ scene: this, x, y });
             this.CrystalBaseFactory.create({ scene: this, x: xc, y: yc });
         }
+        // this.setBounds(0, 0, 1280, 720);
+        this.add.shader('RGB Shift Field', -700, -700, 4000, 2000).setOrigin(0);
+        this.add.image(0, 0, 'map').setOrigin(0).setScale(1);
+
+        this.rata = new Rata(this, 500, 500, 'rata', 'player', this.playerBullets);
+        this.playerGroup.add(this.rata)
+
+        // I tried replacing this with create multiple but there were some shenaningans going on
+        this.enemyGroup.add(new Enemigo(this, 'gato_i', 'enemy', this.rata));
+        this.enemyGroup.add(new Enemigo(this, 'caramelo', 'enemy', this.rata));
+        this.enemyGroup.add(new Enemigo(this, 'tom', 'enemy', this.rata));
+        this.enemyGroup.add(new Enemigo(this, 'gato_d', 'enemy', this.rata));
+        this.enemyGroup.add(new Enemigo(this, 'manchado', 'enemy', this.rata));
+        this.enemyGroup.add(new Enemigo(this, 'rataMala', 'enemy', this.rata));
+
+
         this.cameras.main.startFollow(this.rata)
         this.cameras.main.zoom = 1.5
 
@@ -161,23 +154,39 @@ export default class GameScene extends Phaser.Scene {
         if (available && this.lastSpawnTime + this.spawnDelay < time) {
             this.spawnedEnemies += 1
             //spawn random
-            let selector = Phaser.Math.RND.between(0, 10);
-            if (selector < 2) {
+            let selector = Phaser.Math.RND.between(0, 20);
+            if (selector < 4) {
                 available.setTexture('rataMala');
                 available.setBodySize(52, 58)
                 // random collor would be nice
                 // available.setTint(0xFF0000);
-            } else if (selector === 3) {
+            } else if (selector === 5) {
                 available.setTexture('rata_disfrazada');
                 available.setBodySize(60, 57)
-            } else if (selector < 7) {
-                available.setTexture('gato_i');
+            } else if (selector > 5) {
+                let newSelector = Phaser.Math.RND.between(0, 4);
                 available.setBodySize(115, 90)
+                switch (newSelector) {
+                    case 1:
+                        available.setTexture('gato_i');
+                        break;
+                    case 2:
+                        available.setTexture('gato_d');
+                        break;
+                    case 3:
+                        available.setTexture('tom');
+                        break;
+                    case 4:
+                        available.setTexture('manchado');
+                        break;
+                    case 5:
+                        available.setTexture('caramelo');
+                        break;
+                    default:
+                        break;
+                }
             }
-            else if (selector < 11) {
-                available.setTexture('gato_d');
-                available.setBodySize(115, 90)
-            }
+
             available.setPosition(Phaser.Math.RND.between(0, gameWidth), Phaser.Math.RND.between(0, gameHeight));
             available.enable()
             available.setTarget(this.rata)
