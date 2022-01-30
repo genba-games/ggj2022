@@ -68,6 +68,11 @@ export default class GameScene extends Phaser.Scene {
         });
         Phaser.Actions.SetXY(this.playerBullets.getChildren(), -100, -50);
 
+
+        // this.setBounds(0, 0, 1280, 720);
+        this.add.shader('RGB Shift Field', -700, -700, 4000, 2000).setOrigin(0);
+        this.add.image(0, 0, 'map').setOrigin(0).setScale(1);
+
         for (var i = 0; i < 20; i++) {
             let y = Phaser.Math.RND.between(0, gameHeight);
             let yc = Phaser.Math.RND.between(0, gameHeight);
@@ -77,9 +82,6 @@ export default class GameScene extends Phaser.Scene {
             this.StoneBaseFactory.create({ scene: this, x, y });
             this.CrystalBaseFactory.create({ scene: this, x: xc, y: yc });
         }
-        // this.setBounds(0, 0, 1280, 720);
-        this.add.shader('RGB Shift Field', -700, -700, 4000, 2000).setOrigin(0);
-        this.add.image(0, 0, 'map').setOrigin(0).setScale(1);
 
         this.rata = new Rata(this, 500, 500, 'rata', 'player', this.playerBullets);
         this.playerGroup.add(this.rata)
