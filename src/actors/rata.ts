@@ -1,10 +1,10 @@
 import 'phaser';
-
+const HPY = 30;
+const HPX = 20;
 export default class Rata extends Phaser.GameObjects.Sprite {
     protected score: number
     protected startTime: number
     protected hp: number
-    protected hurt: boolean
     protected speed: number
     protected cursorKeys: {
         up: any,
@@ -22,6 +22,9 @@ export default class Rata extends Phaser.GameObjects.Sprite {
     }
     protected hurtFlicker: Phaser.Tweens.Tween;
     protected hurtInvulnerability: Phaser.Tweens.Tween;
+    protected healthBar: Phaser.GameObjects.Graphics;
+    public hurt: boolean
+    public lastHurt: number;
 
     constructor(scene, x, y, texture, type, bulletGroup) {
         super(scene, x, y, texture);
@@ -93,7 +96,30 @@ export default class Rata extends Phaser.GameObjects.Sprite {
         this.gun = this.scene.add.sprite(this.x, this.y, 'revolver', 0).setOrigin(2, 0).setScale(1.5);
 
         this.modifiers = { gunRotation: 1 }
+        //make 3 bars
+        this.healthBar = this.makeBar(this.x, this.y, 0x2ecc71);
+        // this.rata.
+        this.setBarValue(this.healthBar, 100);
+
+
     }
+    makeBar(x: number, y: number, color: number) {
+        //draw the bar
+        let bar = this.scene.add.graphics({ x: x - HPX, y: y + HPY });
+
+        //color the bar
+        bar.fillStyle(color, 1);
+
+        //fill the bar with a rectangle
+        bar.fillRect(0, 0, 30, 5);
+        //return the bar
+        return bar;
+    }
+    setBarValue(bar: Phaser.GameObjects.Graphics, percentage: number) {
+        //scale the bar
+        bar.setScale(percentage / 100, 1);
+    }
+
 
     /**
      * Enables this actor. An enabled actor is rendered and updated every frame.
@@ -121,14 +147,15 @@ export default class Rata extends Phaser.GameObjects.Sprite {
         if (this.hurt || this.hurtFlicker.isPlaying()) return;
         // this would look neater on the tween onStart
         // but something happened and couldn't make it work
-        console.log("ouch")
-        this.hurt = true;
         this.hurtFlicker.play();
+        this.hurt = true;
         this.hp -= 10;
         if (this.hp <= 0) {
             this.kill();
         }
         this.setData('hp', this.hp);
+        this.setBarValue(this.healthBar, this.hp);
+        this.lastHurt = this.scene.time.now
     }
 
 
@@ -204,6 +231,7 @@ export default class Rata extends Phaser.GameObjects.Sprite {
     // This will call the death transition and send the highscore data
     kill() {
         this.gun.visible = false;
+        this.healthBar.visible = false;
         this.hurt = false;
         // Here we should play the explosion or equivalent
         this.visible = false;
@@ -212,7 +240,7 @@ export default class Rata extends Phaser.GameObjects.Sprite {
         //     enemies: this.enemiesKilled,
         //     startTime: this.startTime
         // };
-        // this.scene.events.emit('playerDeath', data);
+        this.scene.events.emit('playerDeath');
     }
 
     fire() {
@@ -227,8 +255,6 @@ export default class Rata extends Phaser.GameObjects.Sprite {
             if (ab) {
                 ab.fire(this.gun)
             } else {
-                console.log("no bullet in chamber, play click noise")
-                // soundManager.play(this.getData('click'), true);
                 this.scene.sound.play("click");
             }
             // soundManager.play(this.getData('bulletSound'), true);
@@ -237,8 +263,12 @@ export default class Rata extends Phaser.GameObjects.Sprite {
     }
 
     update(time, delta) {
+        //"children" movement, this should be fixed with a container or group
         this.gun.rotation += 0.01 * this.modifiers.gunRotation;
         this.gun.setPosition(this.x, this.y)
+        this.healthBar.setPosition(this.x - HPX, this.y + HPY)
+
+        // Movement
         if (this.cursorKeys.right.isDown && this.cursorKeys.left.isDown) {
             if (this.cursorKeys.up.isDown) {
                 this.moveUp();

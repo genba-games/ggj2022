@@ -1,6 +1,7 @@
 import 'phaser';
 import GameScene from './scenes/game';
 import IntroScene from './scenes/intro';
+import GameOverScene from './scenes/gameover';
 import { gameWidth, gameHeight } from './utils'
 
 
@@ -15,7 +16,7 @@ const config = {
             debug: false,
         }
     },
-    scene: [IntroScene, GameScene],
+    scene: [IntroScene, GameScene, GameOverScene],
     // scene: [GameScene],
 };
 

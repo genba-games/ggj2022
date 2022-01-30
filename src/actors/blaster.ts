@@ -58,9 +58,6 @@ export default class Blaster extends Phaser.GameObjects.Sprite {
         }
     }
     update() {
-        if (this.shot) {
-            // console.log('should move')
-        }
         // Destroy when the bullet leaves the map?
         if (this.y < 0 || this.x < 0) this.destroy();
     }

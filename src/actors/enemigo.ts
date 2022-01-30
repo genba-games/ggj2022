@@ -1,7 +1,7 @@
 import 'phaser';
 import { gameHeight, gameWidth } from '../utils';
 
-export default class Rata extends Phaser.GameObjects.Sprite {
+export default class Enemigo extends Phaser.GameObjects.Sprite {
     protected score: number
     protected startTime: number
     protected hp: number
@@ -16,11 +16,14 @@ export default class Rata extends Phaser.GameObjects.Sprite {
         this.scene = scene;
         this.scene.add.existing(this);
         this.scene.physics.world.enableBody(this, 0);
-        this.setData('type', type);
 
         if (this.body instanceof Phaser.Physics.Arcade.Body) {
             this.body.setCollideWorldBounds();
         }
+        this.setData('type', type);
+
+        this.setActive(true);
+        this.setVisible(true);
 
         this.hp = 100;
         this.hurt = false;
@@ -44,7 +47,14 @@ export default class Rata extends Phaser.GameObjects.Sprite {
         // var follower = this.scene.add.follower(path, target.x, target.y, texture);
         // follower.startFollow(1000);
     }
-
+    setBodySize(w, h) {
+        if (this.body instanceof Phaser.Physics.Arcade.Body) {
+            this.body.setSize(w, h);
+        }
+    }
+    setTarget(target) {
+        this.target = target;
+    }
     /**
      * Enables this actor. An enabled actor is rendered and updated every frame.
      * Called to recycle a previously disabled actor.
@@ -67,13 +77,11 @@ export default class Rata extends Phaser.GameObjects.Sprite {
         if (this.scene) this.scene.tweens.killTweensOf(this);
     }
     hit() {
-        console.log("this should update the score and kill the enemy")
         this.scene.events.emit('enemyKill', this.score);
-        this.destroy();
+        this.disable();
     }
     update(time, delta) {
         this.scene.physics.moveToObject(this, this.target, this.speed)
-
 
     }
 

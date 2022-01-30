@@ -12,7 +12,6 @@ export abstract class BaseFactory {
     constructor() { }
 
     protected logCreation(name: string): void {
-        console.log(name + ' created! ');
     }
 
     protected abstract create(params: IBaseFactoryCreate): Base;

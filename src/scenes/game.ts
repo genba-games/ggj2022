@@ -8,10 +8,8 @@ import { gameHeight, gameWidth } from '../utils'
 export default class GameScene extends Phaser.Scene {
     private playerGroup: Phaser.GameObjects.Group;
     private enemyGroup: Phaser.GameObjects.Group;
-    private objectGroup: Phaser.GameObjects.Group;
     private StoneBaseFactory: StoneBaseFactory;
     private CrystalBaseFactory: CrystalBaseFactory;
-    private gun: Phaser.GameObjects.Sprite;
     private rata: Rata;
     private enemigo: Enemigo;
     private enemigo2: Enemigo;
@@ -19,6 +17,10 @@ export default class GameScene extends Phaser.Scene {
     private enemigo4: Enemigo;
     private playerBullets: Phaser.GameObjects.Group;
     private score: number
+    private gameMusic: Phaser.Sound.BaseSound;
+    private lastSpawnTime: number;
+    private spawnDelay: number;
+    private spawnedEnemies: number;
     constructor() {
         super('GameScene');
     }
@@ -31,8 +33,11 @@ export default class GameScene extends Phaser.Scene {
         // rata_blanco_s
         this.load.image('rata', 'assets/rata_blanco_s.png');
         this.load.image('rataMala', 'assets/rata_mala.png');
+        this.load.image('rata_disfrazada', 'assets/rata_disfrazada.png');
         this.load.image('revolver', 'assets/revolver.png');
         this.load.image('bullit', 'assets/bullit.png');
+        this.load.image("gato_i", 'assets/gato_i.png')
+        this.load.image("gato_d", 'assets/gato_d.png')
         this.load.spritesheet('crystal', 'assets/crystal.png', { frameWidth: 32, frameHeight: 48 });
         this.load.spritesheet('rock', 'assets/rock.png', { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet('small_crystal', 'assets/small_crystal.png', { frameWidth: 16, frameHeight: 16 });
@@ -45,15 +50,26 @@ export default class GameScene extends Phaser.Scene {
     init() {
         this.StoneBaseFactory = new StoneBaseFactory();
         this.CrystalBaseFactory = new CrystalBaseFactory();
-        this.objectGroup = this.add.group({ maxSize: 20, runChildUpdate: true });
+        // this.objectGroup = this.add.group({ maxSize: 20, runChildUpdate: true });
         this.playerGroup = this.add.group({ runChildUpdate: true });
-        this.enemyGroup = this.add.group({ runChildUpdate: true });
+        this.enemyGroup = this.add.group({ maxSize: 6, runChildUpdate: true });
         this.playerBullets = this.add.group({ maxSize: 6, runChildUpdate: true });
-
+        this.score = 0;
+        this.lastSpawnTime = 0;
+        this.spawnDelay = 100;
     }
 
     create() {
-        this.score = 0;
+
+
+        // this.enemyGroup.createMultiple({
+        //     classType: Enemigo,
+        //     key: 'gato_i',
+        //     repeat: 6,
+        //     active: false,
+
+        // });
+
         this.playerBullets.createMultiple({
             classType: Blaster,
             key: 'blaster',
@@ -68,14 +84,12 @@ export default class GameScene extends Phaser.Scene {
         this.rata = new Rata(this, 500, 500, 'rata', 'player', this.playerBullets);
         this.playerGroup.add(this.rata)
 
-        this.enemigo = new Enemigo(this, 'rataMala', 'enemy', this.rata);
-        this.enemigo2 = new Enemigo(this, 'rataMala', 'enemy', this.rata);
-        this.enemigo3 = new Enemigo(this, 'rataMala', 'enemy', this.rata);
-        this.enemigo4 = new Enemigo(this, 'rataMala', 'enemy', this.rata);
-        this.enemyGroup.add(this.enemigo)
-        this.enemyGroup.add(this.enemigo2)
-        this.enemyGroup.add(this.enemigo3)
-        this.enemyGroup.add(this.enemigo4)
+        this.enemyGroup.add(new Enemigo(this, 'gato_i', 'enemy', this.rata));
+        this.enemyGroup.add(new Enemigo(this, 'gato_i', 'enemy', this.rata));
+        this.enemyGroup.add(new Enemigo(this, 'gato_i', 'enemy', this.rata));
+        this.enemyGroup.add(new Enemigo(this, 'gato_i', 'enemy', this.rata));
+        this.enemyGroup.add(new Enemigo(this, 'gato_i', 'enemy', this.rata));
+        this.enemyGroup.add(new Enemigo(this, 'rataMala', 'enemy', this.rata));
 
         for (var i = 0; i < 20; i++) {
             let y = Phaser.Math.RND.between(0, gameHeight);
@@ -112,16 +126,24 @@ export default class GameScene extends Phaser.Scene {
             this
         );
 
+
+        this.gameMusic = this.sound.add("game_music", { volume: 0.2 });
+        this.gameMusic.play({ volume: 0.2 });
         this.events.on('enemyKill', this.updateScore, this);
+        this.events.on('playerDeath', this.endGame, this);
 
-        let gm = this.sound.play("game_music", { volume: 0.2 });
-
+    }
+    endGame() {
+        this.gameMusic.stop();
+        this.scene.start('GameOverScene', { score: this.score })
     }
     updateScore(score) {
         this.score += score
-        console.log(`New score ${this.score}`)
     }
     playerEnemyCallback(player: any, enemy: Phaser.GameObjects.GameObject) {
+        //This conditional only exists because sometimes the tweens don't call their onComplete functions
+        if (player.hurt === true && player.lastHurt + 110 < player.scene.time.now) player.hurt = false
+        // don't hurt player if enemy is not active(garbage)
         if (!enemy.active) return;
         player.hit();
     }
@@ -134,7 +156,36 @@ export default class GameScene extends Phaser.Scene {
         enemy.hit();
         bullet.hit();
     }
-    update() {
-
+    update(time) {
+        let available: Enemigo | null = this.enemyGroup.get();
+        if (available && this.lastSpawnTime + this.spawnDelay < time) {
+            this.spawnedEnemies += 1
+            //spawn random
+            let selector = Phaser.Math.RND.between(0, 10);
+            if (selector < 2) {
+                available.setTexture('rataMala');
+                available.setBodySize(52, 58)
+                // random collor would be nice
+                // available.setTint(0xFF0000);
+            } else if (selector === 3) {
+                available.setTexture('rata_disfrazada');
+                available.setBodySize(60, 57)
+            } else if (selector < 7) {
+                available.setTexture('gato_i');
+                available.setBodySize(115, 90)
+            }
+            else if (selector < 11) {
+                available.setTexture('gato_d');
+                available.setBodySize(115, 90)
+            }
+            available.setPosition(Phaser.Math.RND.between(0, gameWidth), Phaser.Math.RND.between(0, gameHeight));
+            available.enable()
+            available.setTarget(this.rata)
+            this.lastSpawnTime = time;
+            //every n enemies spawned we should increase the pool 
+            if (this.spawnedEnemies % 10 == 0) {
+                this.enemyGroup.maxSize += 1;
+            }
+        }
     }
 }
