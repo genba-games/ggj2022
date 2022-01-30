@@ -7,13 +7,13 @@ export default class GameScene extends Phaser.Scene {
     private playerGroup: Phaser.GameObjects.Group;
     private gun: Phaser.GameObjects.Sprite;
     private rata: RataInicio;
-    private score: number
     private curtain: Phaser.GameObjects.Rectangle;
     constructor() {
         super('IntroScene');
     }
     preload() {
-        this.load.image('rata', 'assets/rata_blanco_s.png');
+        this.load.image('rata_disfrazada', 'assets/rata_disfrazada.png');
+        this.load.image('revolver', 'assets/revolver.png');
         this.load.image('revolver', 'assets/revolver.png');
 
         this.load.image('map', 'assets/map.png');
@@ -28,7 +28,7 @@ export default class GameScene extends Phaser.Scene {
     create() {
         this.add.image(0, 0, 'map').setOrigin(0).setScale(1);
 
-        this.rata = new RataInicio(this, 1000, 500, 'rata');
+        this.rata = new RataInicio(this, 1000, 700, 'rata_disfrazada');
         this.playerGroup.add(this.rata)
 
         this.cameras.main.startFollow(this.rata)
@@ -36,9 +36,6 @@ export default class GameScene extends Phaser.Scene {
 
         this.gun = this.add.sprite(1000, 400, 'revolver', 0).setScale(1.5);
         this.physics.world.enableBody(this.gun, 0);
-        // if (this.gun.body instanceof Phaser.Physics.Arcade.Body) {
-        //     this.gun.body.setCircle(20);
-        // }
         this.physics.add.overlap(
             this.playerGroup,
             this.gun,
@@ -53,10 +50,7 @@ export default class GameScene extends Phaser.Scene {
             .setAlpha(0);
 
     }
-    updateScore(score) {
-        this.score += score
-        console.log(`New score ${this.score}`)
-    }
+
     playerRevolverCallback(player: any, revolver: any) {
         player.body.enable = false;
         const timeline = this.tweens

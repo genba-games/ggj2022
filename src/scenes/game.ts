@@ -76,7 +76,7 @@ export default class GameScene extends Phaser.Scene {
         this.enemyGroup.add(this.enemigo3)
         this.enemyGroup.add(this.enemigo4)
 
-        this.objectGroup.createMultiple({ key: 'rock', frame: 0, active: true, visible: true, setXY: { x: 20, y: 20, stepX: 32, stepY: 32 }, max: 10 });
+        this.objectGroup.createMultiple({ key: 'rock', frame: 0, active: true, visible: true, setXY: { x: 20, y: 20, stepX: 10, stepY: 10 }, max: 500 });
         this.cameras.main.startFollow(this.rata)
         this.cameras.main.zoom = 1.5
 
